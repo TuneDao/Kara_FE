@@ -1,5 +1,6 @@
-const API_URL ="http://nestjs.codmaster.id.vn:8000";
-
+const API_URL = "http://localhost:8000";
+// Local : http://localhost:8000
+// Server : http://nestjs.codmaster.id.vn:8000
 export const login = async (credentials) => {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
