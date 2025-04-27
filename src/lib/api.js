@@ -1,4 +1,4 @@
-const API_URL = "https://kara-be.onrender.com/";
+const API_URL = "https://kara-be.onrender.com";
 // Server : https://kara-be.onrender.com/
 export const login = async (credentials) => {
   const response = await fetch(`${API_URL}/auth/login`, {
