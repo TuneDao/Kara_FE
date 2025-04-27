@@ -1,0 +1,189 @@
+/* Header */
+.header {
+  background: linear-gradient(90deg, #1677ff, #69b1ff);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: none;
+}
+
+.breadcrumb {
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+.breadcrumb .ant-breadcrumb-link {
+  color: #f0f5ff !important;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.breadcrumb .ant-breadcrumb-link:hover {
+  color: #bae6fd !important;
+}
+
+.breadcrumb .ant-breadcrumb-separator {
+  color: #f0f5ff !important;
+}
+
+.userIcon {
+  font-size: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userIcon:hover {
+  transform: scale(1.15);
+  color: #e6f4ff;
+}
+
+/* Sidebar */
+.siderWrapper {
+  height: 100%;
+  background: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.siderHeader {
+  padding: 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+}
+
+.siderHeader h2 {
+  color: #1f1f1f;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: none;
+}
+
+.menu .ant-menu-item {
+  color: #595959 !important;
+  margin: 8px 12px !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.menu .ant-menu-item:hover {
+  background: #e6f4ff !important;
+  color: #1677ff !important;
+  transform: translateX(3px);
+}
+
+.menu .ant-menu-item-selected {
+  background: #e6f4ff !important;
+  color: #1677ff !important;
+  box-shadow: none;
+  transform: translateX(3px);
+}
+
+.menu .ant-menu-item-icon {
+  font-size: 16px !important;
+  color: #595959 !important;
+}
+
+.menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #1677ff !important;
+}
+
+/* Content */
+.content {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100%;
+}
+
+/* SearchBar */
+.searchBar {
+  margin-bottom: 16px;
+  max-width: 360px;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.searchBar:hover,
+.searchBar:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Table */
+.table {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.table .ant-table-thead > tr > th {
+  background: #f9f0ff;
+  color: #1f1f1f;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.table .ant-table-tbody > tr:hover > td {
+  background: #fafafa;
+}
+
+/* Action Buttons */
+.actionView {
+  color: #1677ff !important;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.actionEdit {
+  color: #52c41a !important;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.actionDelete {
+  color: #ff4d4f !important;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.actionView:hover,
+.actionEdit:hover,
+.actionDelete:hover {
+  transform: scale(1.1);
+  opacity: 0.85;
+}
+
+/* Dropdown Menu */
+.dropdownMenu {
+  min-width: 140px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.dropdownItem {
+  color: #1f1f1f !important;
+  font-weight: 500;
+}
+
+.dropdownItem:hover {
+  background: #f0f2f5 !important;
+  color: #1677ff !important;
+}
