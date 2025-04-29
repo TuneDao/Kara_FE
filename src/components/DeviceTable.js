@@ -7,14 +7,16 @@ import {
   createDevice,
   updateDevice,
   getDeviceById,
+  renewDeviceSubscription,
 } from "../lib/api";
 import { getRooms } from "../lib/api";
-import SearchBar from "../components/SearchBar"; // Import SearchBar
+import SearchBar from "../components/SearchBar";
 import styles from "../styles/Dashboard.module.css";
+import moment from "moment";
 
 const DeviceTable = () => {
   const [devices, setDevices] = useState([]);
-  const [filteredDevices, setFilteredDevices] = useState([]); // Thêm state cho danh sách đã lọc
+  const [filteredDevices, setFilteredDevices] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -22,7 +24,6 @@ const DeviceTable = () => {
   const [currentDevice, setCurrentDevice] = useState(null);
   const [form] = Form.useForm();
 
-  // Lấy danh sách thiết bị và phòng khi component được mount
   useEffect(() => {
     fetchDevices();
     fetchRooms();
@@ -37,16 +38,20 @@ const DeviceTable = () => {
         deviceName: device.Name,
         deviceType: device.DeviceType,
         room: device.room?.RoomName || "Chưa gán phòng",
-        mac: device.MAC,
+        deviceId: device.device_id,
         ip: device.ip,
         description: device.Description,
-        deviceCode: device.device_code,
+        deviceCode: device.device_code || "Hết hạn",
         roomId: device.RoomID,
+        subscriptionExpiry: device.subscription_expiry
+          ? moment(device.subscription_expiry).format("YYYY-MM-DD HH:mm")
+          : "Chưa có",
+        plan: device.plan || "Không có",
       }));
       setDevices(mappedDevices);
-      setFilteredDevices(mappedDevices); // Khởi tạo danh sách đã lọc
+      setFilteredDevices(mappedDevices);
     } catch (error) {
-      message.error(error.message);
+      message.error(error.message || "Lỗi khi tải danh sách thiết bị");
     } finally {
       setLoading(false);
     }
@@ -59,14 +64,13 @@ const DeviceTable = () => {
         data.map((room) => ({ value: room.RoomID, label: room.RoomName }))
       );
     } catch (error) {
-      message.error(error.message);
+      message.error(error.message || "Lỗi khi tải danh sách phòng");
     }
   };
 
-  // Xử lý tìm kiếm
   const handleSearch = (value) => {
     if (!value) {
-      setFilteredDevices(devices); // Nếu không có giá trị tìm kiếm, hiển thị toàn bộ danh sách
+      setFilteredDevices(devices);
       return;
     }
     const filtered = devices.filter(
@@ -77,14 +81,27 @@ const DeviceTable = () => {
     setFilteredDevices(filtered);
   };
 
-  // Xử lý tạo hoặc cập nhật thiết bị
   const handleSaveDevice = async (values) => {
     try {
+      const deviceData = {
+        Name: values.Name,
+        DeviceType: values.DeviceType,
+        Description: values.Description,
+        device_id: values.device_id,
+        RoomID: values.RoomID,
+        ip: values.ip,
+        device_code: values.device_code,
+        plan: values.plan,
+        subscription_expiry: values.subscription_expiry
+          ? moment(values.subscription_expiry).toISOString()
+          : undefined,
+      };
+
       if (currentDevice) {
-        await updateDevice(currentDevice.key, values);
+        await updateDevice(currentDevice.key, deviceData);
         message.success("Cập nhật thiết bị thành công");
       } else {
-        await createDevice(values);
+        await createDevice(deviceData);
         message.success("Tạo thiết bị thành công");
       }
       fetchDevices();
@@ -92,11 +109,10 @@ const DeviceTable = () => {
       form.resetFields();
       setCurrentDevice(null);
     } catch (error) {
-      message.error(error.message);
+      message.error(error.message || "Lỗi khi lưu thiết bị");
     }
   };
 
-  // Xử lý xóa thiết bị
   const handleDelete = async (deviceId) => {
     Modal.confirm({
       title: "Xác nhận xóa",
@@ -107,41 +123,117 @@ const DeviceTable = () => {
           message.success("Xóa thiết bị thành công");
           fetchDevices();
         } catch (error) {
-          message.error(error.message);
+          message.error(error.message || "Lỗi khi xóa thiết bị");
         }
       },
     });
   };
 
-  // Xử lý xem chi tiết thiết bị
   const handleView = async (deviceId) => {
     try {
       const device = await getDeviceById(deviceId);
       setCurrentDevice({
         ...device,
         room: device.room?.RoomName || "Chưa gán phòng",
+        subscription_expiry: device.subscription_expiry
+          ? moment(device.subscription_expiry).format("YYYY-MM-DD HH:mm")
+          : "Chưa có",
+        plan: device.plan || "Không có",
+        device_code: device.device_code || "Hết hạn",
       });
       setIsViewModalVisible(true);
     } catch (error) {
-      message.error(error.message);
+      message.error(error.message || "Lỗi khi xem chi tiết thiết bị");
     }
   };
 
-  // Xử lý mở modal chỉnh sửa
-  const handleEdit = (device) => {
-    setCurrentDevice(device);
-    form.setFieldsValue({
-      Name: device.deviceName,
-      DeviceType: device.deviceType,
-      Description: device.description,
-      MAC: device.mac,
-      RoomID: device.roomId,
-      ip: device.ip,
-    });
-    setIsModalVisible(true);
+  const handleEdit = async (device) => {
+    try {
+      const updatedDevice = await getDeviceById(device.key);
+      const newDevice = {
+        key: updatedDevice.DeviceID,
+        deviceName: updatedDevice.Name,
+        deviceType: updatedDevice.DeviceType,
+        room: updatedDevice.room?.RoomName || "Chưa gán phòng",
+        deviceId: updatedDevice.device_id,
+        ip: updatedDevice.ip,
+        description: updatedDevice.Description,
+        deviceCode: updatedDevice.device_code || "Hết hạn",
+        roomId: updatedDevice.RoomID,
+        subscriptionExpiry: updatedDevice.subscription_expiry
+          ? moment(updatedDevice.subscription_expiry).format("YYYY-MM-DD HH:mm")
+          : "Chưa có",
+        plan: updatedDevice.plan || "Không có",
+      };
+
+      setCurrentDevice(newDevice);
+      form.setFieldsValue({
+        Name: newDevice.deviceName,
+        DeviceType: newDevice.deviceType,
+        Description: newDevice.description,
+        device_id: newDevice.deviceId,
+        RoomID: newDevice.roomId,
+        ip: newDevice.ip,
+        device_code:
+          newDevice.deviceCode === "Hết hạn" ? undefined : newDevice.deviceCode,
+        plan: newDevice.plan === "Không có" ? undefined : newDevice.plan,
+        subscription_expiry:
+          newDevice.subscriptionExpiry === "Chưa có"
+            ? undefined
+            : moment(newDevice.subscriptionExpiry, "YYYY-MM-DD HH:mm"),
+      });
+      setIsModalVisible(true);
+    } catch (error) {
+      message.error(error.message || "Lỗi khi mở form chỉnh sửa");
+    }
   };
 
-  // Cột của bảng
+  const handleRenew = async (deviceId) => {
+    try {
+      const device = await getDeviceById(deviceId);
+      const baseDate = device.subscription_expiry
+        ? moment(device.subscription_expiry).format("YYYY-MM-DD HH:mm")
+        : moment().format("YYYY-MM-DD HH:mm");
+
+      Modal.confirm({
+        title: "Gia hạn thiết bị",
+        content: (
+          <div>
+            <p>
+              <strong>Ngày bắt đầu gia hạn:</strong> {baseDate}
+            </p>
+            <Form form={form} layout="vertical">
+              <Form.Item
+                name="plan"
+                label="Chọn gói gia hạn"
+                rules={[{ required: true, message: "Vui lòng chọn gói" }]}
+              >
+                <Select placeholder="Chọn gói">
+                  <Select.Option value="1month">1 tháng</Select.Option>
+                  <Select.Option value="3months">3 tháng</Select.Option>
+                  <Select.Option value="6months">6 tháng</Select.Option>
+                  <Select.Option value="year">1 năm</Select.Option>
+                </Select>
+              </Form.Item>
+            </Form>
+          </div>
+        ),
+        onOk: async () => {
+          try {
+            const values = await form.validateFields();
+            await renewDeviceSubscription(deviceId, values.plan);
+            message.success("Gia hạn thiết bị thành công");
+            fetchDevices();
+          } catch (error) {
+            message.error(error.message || "Lỗi khi gia hạn thiết bị");
+          }
+        },
+      });
+    } catch (error) {
+      message.error(error.message || "Lỗi khi tải dữ liệu thiết bị");
+    }
+  };
+
   const columns = [
     {
       title: "Tên thiết bị",
@@ -157,6 +249,16 @@ const DeviceTable = () => {
       title: "Phòng",
       dataIndex: "room",
       key: "room",
+    },
+    {
+      title: "Mã thiết bị",
+      dataIndex: "deviceCode",
+      key: "deviceCode",
+    },
+    {
+      title: "Ngày hết hạn",
+      dataIndex: "subscriptionExpiry",
+      key: "subscriptionExpiry",
     },
     {
       title: "Action",
@@ -187,6 +289,13 @@ const DeviceTable = () => {
           >
             Xóa
           </Button>
+          <Button
+            type="link"
+            onClick={() => handleRenew(record.key)}
+            className={styles.actionRenew}
+          >
+            Gia hạn
+          </Button>
         </span>
       ),
     },
@@ -194,7 +303,7 @@ const DeviceTable = () => {
 
   return (
     <div>
-      <SearchBar onSearch={handleSearch} /> {/* Thêm SearchBar */}
+      <SearchBar onSearch={handleSearch} />
       <Button
         type="primary"
         onClick={() => {
@@ -207,13 +316,12 @@ const DeviceTable = () => {
         Thêm thiết bị
       </Button>
       <Table
-        dataSource={filteredDevices} // Sử dụng filteredDevices thay vì devices
+        dataSource={filteredDevices}
         columns={columns}
         pagination={{ pageSize: 5 }}
         loading={loading}
         className={styles.table}
       />
-      {/* Modal tạo/chỉnh sửa thiết bị */}
       <Modal
         title={currentDevice ? "Chỉnh sửa thiết bị" : "Tạo thiết bị mới"}
         visible={isModalVisible}
@@ -249,7 +357,7 @@ const DeviceTable = () => {
           <Form.Item
             name="device_id"
             label="ID thiết bị"
-            rules={[{ required: true, message: "Vui lòng nhập địa chỉ MAC" }]}
+            rules={[{ required: true, message: "Vui lòng nhập ID thiết bị" }]}
           >
             <Input />
           </Form.Item>
@@ -267,9 +375,39 @@ const DeviceTable = () => {
           >
             <Input />
           </Form.Item>
+          <Form.Item
+            name="device_code"
+            label="Mã thiết bị"
+            rules={[
+              {
+                pattern: /^\d{6}$/,
+                message: "Mã thiết bị phải là số có 6 chữ số",
+              },
+            ]}
+          >
+            <Input placeholder="Nhập mã thiết bị (6 chữ số)" />
+          </Form.Item>
+          <Form.Item
+            name="plan"
+            label="Gói dịch vụ"
+            rules={[{ required: false }]}
+          >
+            <Select placeholder="Chọn gói" allowClear>
+              <Select.Option value="1month">1 tháng</Select.Option>
+              <Select.Option value="3months">3 tháng</Select.Option>
+              <Select.Option value="6months">6 tháng</Select.Option>
+              <Select.Option value="year">1 năm</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            name="subscription_expiry"
+            label="Ngày hết hạn"
+            rules={[{ required: false }]}
+          >
+            <Input type="datetime-local" />
+          </Form.Item>
         </Form>
       </Modal>
-      {/* Modal xem chi tiết thiết bị */}
       <Modal
         title="Chi tiết thiết bị"
         visible={isViewModalVisible}
@@ -299,6 +437,12 @@ const DeviceTable = () => {
             </p>
             <p>
               <strong>Mã thiết bị:</strong> {currentDevice.device_code}
+            </p>
+            <p>
+              <strong>Gói dịch vụ:</strong> {currentDevice.plan}
+            </p>
+            <p>
+              <strong>Ngày hết hạn:</strong> {currentDevice.subscription_expiry}
             </p>
             <p>
               <strong>Mô tả:</strong> {currentDevice.Description || "Không có"}

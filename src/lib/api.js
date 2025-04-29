@@ -1,5 +1,6 @@
 const API_URL = "https://kara-be.onrender.com";
-// Server : https://kara-be.onrender.com/
+// Server : https://kara-be.onrender.com
+
 export const login = async (credentials) => {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
@@ -139,19 +140,6 @@ export const deleteRoom = async (roomId) => {
   }
 };
 
-// Hàm xử lý phản hồi chung
-const handleResponse = async (response) => {
-  const data = await response.json();
-  if (!response.ok) {
-    if (response.status === 401) {
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
-      window.location.href = "/login";
-    }
-    throw new Error(data.message || "Có lỗi xảy ra");
-  }
-  return data;
-};
 // DEVICES
 // Hàm gọi API tạo thiết bị mới
 export const createDevice = async (deviceData) => {
@@ -164,7 +152,13 @@ export const createDevice = async (deviceData) => {
     },
     body: JSON.stringify(deviceData),
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Tạo thiết bị thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API lấy danh sách thiết bị
@@ -176,7 +170,13 @@ export const getDevices = async () => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Lấy danh sách thiết bị thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API lấy thông tin thiết bị theo ID
@@ -188,7 +188,13 @@ export const getDeviceById = async (deviceId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Lấy thông tin thiết bị thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API cập nhật thiết bị
@@ -202,7 +208,13 @@ export const updateDevice = async (deviceId, deviceData) => {
     },
     body: JSON.stringify(deviceData),
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Cập nhật thông tin thiết bị thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API xóa thiết bị
@@ -214,8 +226,13 @@ export const deleteDevice = async (deviceId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return handleResponse(response);
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Xóa thiết bị thất bại");
+  }
 };
+
 // CONNECTIONS
 // Hàm gọi API tạo kết nối mới
 export const createConnection = async (connectionData) => {
@@ -228,7 +245,13 @@ export const createConnection = async (connectionData) => {
     },
     body: JSON.stringify(connectionData),
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Tạo kết nối thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API lấy danh sách kết nối
@@ -240,7 +263,13 @@ export const getConnections = async () => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Lấy danh sách kết nối thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API lấy thông tin kết nối theo ID
@@ -252,7 +281,13 @@ export const getConnectionById = async (connectionId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Lấy thông tin kết nối thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API cập nhật kết nối
@@ -269,7 +304,13 @@ export const updateConnection = async (connectedDeviceId, connectionData) => {
       body: JSON.stringify(connectionData),
     }
   );
-  return handleResponse(response);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Cập nhật thông tin kết nối thất bại");
+  }
+
+  return data;
 };
 
 // Hàm gọi API xóa kết nối
@@ -281,5 +322,28 @@ export const deleteConnection = async (connectionId) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  return handleResponse(response);
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || "Xóa phòng thất bại");
+  }
+};
+
+// Hàm gọi API gia hạn gói dịch vụ cho thiết bị
+export const renewDeviceSubscription = async (deviceId, plan) => {
+  const token = sessionStorage.getItem("token");
+  const response = await fetch(`${API_URL}/devices/${deviceId}/renew`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ plan }),
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Gia hạn thất bại");
+  }
+
+  return data;
 };
