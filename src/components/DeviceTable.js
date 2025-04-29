@@ -375,37 +375,6 @@ const DeviceTable = () => {
           >
             <Input />
           </Form.Item>
-          <Form.Item
-            name="device_code"
-            label="Mã thiết bị"
-            rules={[
-              {
-                pattern: /^\d{6}$/,
-                message: "Mã thiết bị phải là số có 6 chữ số",
-              },
-            ]}
-          >
-            <Input placeholder="Nhập mã thiết bị (6 chữ số)" />
-          </Form.Item>
-          <Form.Item
-            name="plan"
-            label="Gói dịch vụ"
-            rules={[{ required: false }]}
-          >
-            <Select placeholder="Chọn gói" allowClear>
-              <Select.Option value="1month">1 tháng</Select.Option>
-              <Select.Option value="3months">3 tháng</Select.Option>
-              <Select.Option value="6months">6 tháng</Select.Option>
-              <Select.Option value="year">1 năm</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item
-            name="subscription_expiry"
-            label="Ngày hết hạn"
-            rules={[{ required: false }]}
-          >
-            <Input type="datetime-local" />
-          </Form.Item>
         </Form>
       </Modal>
       <Modal
